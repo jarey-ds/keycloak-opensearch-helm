@@ -205,6 +205,18 @@ helm template keycloak-openseach . -f values.yaml --output-dir ./output
 6. **Monitorización**: Integrar componentes con herramientas de monitorización en función de las necesidades deseadas
 7. **Escalado**: Ajustar el número de réplicas de los componentes, así como reglas para el HPA de cara a contar con escalado dinámico de así requerirse.
 
+## Consideraciones de configuración Opensearch + OIDC.
+
+La configuración más relevantes de este despliegue reside en el configMap generado por la plantilla "opensearch-security-config.yaml".
+Esta configuración es suministrada tanto para el despliegue de opensearch-dashboards, como para los nodos del back-end opesearch.
+
+Es importante tener en cuenta que todo el alcance de la configuración OIDC se alberga en los siguientes alcances:
+- configuración OIDC como cliente: en opensearch-dashboards, se refleja clientID/clientSecret y URL del proveedor OIDC (keycloak en nuestro caso). Se montará dicha configuración en el fichero opensearch_dashboards.yml en el contenedor de dicho componente. En dicha configuración principalmente se modela la configuración del plugin de seguridad, desde el tipo de login admitido (oidc en nuestro caso), hasta las previamente mencionadas opciones de configuración OIDC.
+- configuración a nivel de opensearch backend: los nodos del cluster de opensearch necesitan una configuración del plugin de seguridad complementaria, estableciendo los métodos de login admitidos (no los seleccionados, sino los admitidos por el cluster), así como las políticas de existencia de roles, la configuración de los mismos determinando el acceso a las funcionalidades de opensearch que se les otorga y finalmente la configuración del mapeo de los roles externos (provinientes del token OIDC), su correspondiente localización en el token de seguridad y el rol interno de opensearch al que se ven ligados.
+Esta información se ve reflejada en las entradas de roles.yml y roles_mapping.yml que se incluyen como ejemplos de un mapeo de roles más avanzado (en caso de necesitarse). El ejemplo proporcionado, no usa dicha configuración (ya que como se puede ver en el values.yaml no la monta como volúmenes); y se basa en el funcionamiento por defecto en que el rol "admin" que posee el usuario testuser/testpassword en el realm "new" de keycloak, mapea de forma predeterminada al rol interno "admin" de keycloak que proporciona el acceso "all_access" a todas las funcionalidades del sistema. 
+
+De requerir roles adicionales, estos ficheros han de configurarse de la forma deseada, y montarse de manera adicional en el values.yaml de igual forma que se hace para sus homólogos sí configurados.
+
 ## Fuentes
 
 - [Bitnami Helm Charts](https://github.com/bitnami/charts) charts base
