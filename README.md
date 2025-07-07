@@ -140,6 +140,23 @@ Una vez desplegados los componentes estos están accesibles mediante:
 - 🔐 **Consola de adminstración de Keycloak**: http://my-domain.local/keycloak-auth/admin
 - 📊 **Cuenta de usuario en Keycloak**: http://my-domain.local/keycloak-auth/realms/new/account
 
+## Ejecución en Minikube
+Minikube cuenta con su propio controlador de ingreso Nginx, proporcionado por un addon de Minikube, con lo cual deshabilitar dicho componente es necesario si se realiza el despliegue en esta plataforma.
+
+Los pasos de ejecución serían los siguientes en el caso de Minikube:
+
+```bash
+minikube start
+minikube addons enable ingress
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm dependency update
+helm upgrade --install --create-namespace -n keycloak-openseach keycloak-openseach . -f values.yaml
+```
+Este resumen solo pretende ilustrar la preparación del cluster minikube para ejecutar los pasos de ejecución del Chart ya desglosados en puntos previos de esta documentación.
+Resaltar que los valores por defecto del chart deshabilitan la creación del contrador de ingreso Nginx, teniendo en cuenta la naturaleza de pruebas del Chart en dicha plataforma.
+ver values.yaml#l21
+
 ## 🔧 Configuration
 
 ### Default Credentials
